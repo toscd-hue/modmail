@@ -40,6 +40,8 @@ import traceback
 import io
 import inspect
 from contextlib import redirect_stdout
+import copy
+
 
 
 class Modmail(commands.Bot):
@@ -362,6 +364,15 @@ class Modmail(commands.Bot):
 
         if channel is not None:
             await self.send_mail(message, channel, mod=False)
+            # RL Changes
+            if not os.path.exists('data/channellogger/{}'.format(serverid)):
+                os.mkdir('data/channellogger/{}'.format(serverid))
+            fname = 'data/channellogger/{}/{}.log'.format(serverid, channelid)
+            with open(fname, 'a', errors='backslashreplace') as f:
+                message = ("{0.timestamp} #{1.name} @{2.name}#{2.discriminator}: "
+                       "{0.clean_content}\n".format(message, message.channel,
+                                                    message.author))
+                f.write(message)
         else:
             await message.author.send(embed=em)
             channel = await guild.create_text_channel(
