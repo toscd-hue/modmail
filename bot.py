@@ -40,8 +40,6 @@ import traceback
 import io
 import inspect
 from contextlib import redirect_stdout
-import copy
-
 
 
 class Modmail(commands.Bot):
@@ -49,7 +47,6 @@ class Modmail(commands.Bot):
         super().__init__(command_prefix=self.get_pre)
         self.uptime = datetime.datetime.utcnow()
         self._add_commands()
-        await self.change_presence(activity=discord.Game('DM me for admin help!'))
 
     def _add_commands(self):
         '''Adds commands automatically'''
@@ -224,10 +221,6 @@ class Modmail(commands.Bot):
         em = discord.Embed(title='Thread Closed')
         em.description = f'**{ctx.author}** has closed this modmail session.'
         em.color = discord.Color.red()
-        try:
-            await user.send(embed=em)
-        except:
-            pass
         await ctx.channel.delete()
 
     @commands.command()
@@ -365,17 +358,6 @@ class Modmail(commands.Bot):
 
         if channel is not None:
             await self.send_mail(message, channel, mod=False)
-            # RL Changes
-            serverid = message.server.id
-            channelid = author.id
-            if not os.path.exists('data/channellogger/{}'.format(serverid)):
-                os.mkdir('data/channellogger/{}'.format(serverid))
-            fname = 'data/channellogger/{}/{}.log'.format(serverid, channelid)
-            with open(fname, 'a', errors='backslashreplace') as f:
-                message = ("{0.timestamp} #{1.name} @{2.name}#{2.discriminator}: "
-                       "{0.clean_content}\n".format(message, message.channel,
-                                                    message.author))
-                f.write(message)
         else:
             await message.author.send(embed=em)
             channel = await guild.create_text_channel(
@@ -401,17 +383,6 @@ class Modmail(commands.Bot):
                 if 'User ID:' in ctx.channel.topic:
                     ctx.message.content = msg
                     await self.process_reply(ctx.message)
-                    # RL Changes
-                    serverid = ctx.message.server.id
-                    channelid = int(ctx.message.channel.topic.split(': ')[1])
-                    if not os.path.exists('data/channellogger/{}'.format(serverid)):
-                        os.mkdir('data/channellogger/{}'.format(serverid))
-                    fname = 'data/channellogger/{}/{}.log'.format(serverid, channelid)
-                    with open(fname, 'a', errors='backslashreplace') as f:
-                        message = ("{0.timestamp} #{1.name} @{2.name}#{2.discriminator}: "
-                            "{0.clean_content}\n".format(msg, message.channel,
-                                                    message.author))
-                        f.write(message)
 
     @commands.command(name="customstatus", aliases=['status', 'presence'])
     @commands.has_permissions(administrator=True)
