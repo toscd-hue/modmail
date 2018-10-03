@@ -102,14 +102,14 @@ class Modmail(commands.Bot):
         else:
             to_use = bot.token.strip('"')
         try:
-            bot.run(to_use, activity=discord.Game(os.getenv('STATUS')), reconnect=True)
+            bot.run(to_use, activity=discord.Game("DM me for help!"), reconnect=True)
         except Exception as e:
             raise e
 
     async def on_connect(self):
         print('---------------')
         print('Modmail connected!')
-        status = os.getenv('STATUS')
+        status = "DM me for help!"
         if status:
             print(f'Setting Status to {status}')
         else:
@@ -373,6 +373,9 @@ class Modmail(commands.Bot):
         await self.process_commands(message)
         if isinstance(message.channel, discord.DMChannel):
             await self.process_modmail(message)
+            with open(f"logs/{message.author.id}.txt", "a+") as f:
+                f.write(f"[{message.author.name} (User)][{datetime.utcnow()}] || {message.content}")
+                f.close()
 
     @commands.command()
     async def reply(self, ctx, *, msg):
@@ -383,6 +386,10 @@ class Modmail(commands.Bot):
                 if 'User ID:' in ctx.channel.topic:
                     ctx.message.content = msg
                     await self.process_reply(ctx.message)
+                    user_id = int(ctx.message.channel.topic.split(': ')[1])
+                    with open(f"logs/{user_id}.txt", "a+") as f:
+                        f.write(f"[{ctx.message.author.name} (Mod)][{datetime.utcnow()}] || {msg}")
+                        f.close()
 
     @commands.command(name="customstatus", aliases=['status', 'presence'])
     @commands.has_permissions(administrator=True)
