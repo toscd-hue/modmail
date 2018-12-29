@@ -412,7 +412,7 @@ class Modmail(commands.Bot):
         await self.send_mail(message, message.channel, from_mod=True)
         m = await self.send_mail(message, user, from_mod=True)
 
-        await self.db.execute(f"INSERT INTO modmail_links ({message.id}, {m.id}, TRUE)")
+        await self.db.execute(f"INSERT INTO modmail_links VALUES ({message.id}, {m.id}, TRUE)")
 
     def format_name(self, author, channels):
         name = author.name
