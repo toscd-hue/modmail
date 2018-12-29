@@ -375,7 +375,7 @@ class Modmail(commands.Bot):
 
         db_log = f'{message.author.name} (Admin) {message.created_at.strftime("%Y-%b-%d %H:%M:%S")} || {message.content}'
         try:
-            await self.db.execute(f"INSERT INTO modmail_log VALUES ({message.author.id}, '{db_log}')")
+            await self.db.execute(f"INSERT INTO modmail_log VALUES ({user_id}, '{db_log}')")
         except:
             pass
         
