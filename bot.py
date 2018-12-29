@@ -146,24 +146,24 @@ class Modmail(commands.Bot):
                 if matches:
                     return int(matches[0])
 
-    async def on_message_delete(self, message):
-        """Support for deleting linked messages"""
-        if message.embeds and not isinstance(message.channel, discord.DMChannel):
-            matches = re.findall(r'Moderator - (\d+)', str(message.embeds[0].footer.text))
-            if matches:
-                user_id = None
-                if not message.channel.topic:
-                    user_id = await self.find_user_id_from_channel(message.channel)
-                user_id = user_id or int(message.channel.topic.split(': ')[1])
+    async def on_raw_message_delete(self, message: discord.RawMessageDeleteEvent):
+        channel = discord.utils.get(self.get_all_channels(), id=message.channel_id)
+        if not channel.category.name.lower() == 'mod mail':
+            return
 
-                user = self.get_user(user_id)
-                channel = user.dm_channel
-                message_id = matches[0]
+        if not message.guild_id:  # Checks if this was a mod or not
+            return
 
-                async for msg in channel.history():
-                    if msg.embeds and f'Moderator - {message_id}' in msg.embeds[0].footer.text:
-                        await msg.delete()
-                        break
+        data = await self.db.fetch_row(f"SELECT * FROM modmail_links WHERE sent = {message.message_id}")
+
+        if not data:
+            return
+
+        user_id = int(channel.topic.split(': ')[1])
+        user = channel.guild.get_member(user_id)
+
+        message = await user.get_message(int(data['sent']))
+        await message.delete()
 
     def overwrites(self, ctx, modrole=None):
         """Permision overwrites for the guild."""
@@ -389,13 +389,15 @@ class Modmail(commands.Bot):
             em.set_author(name=str(author), icon_url=author.avatar_url)
             em.set_footer(text='User')
 
-        await channel.send(embed=em)
+        m = await channel.send(embed=em)
 
         if delete_message:
             try:
                 await message.delete()
             except:
                 pass
+
+        return m
 
     async def process_reply(self, message):
         user_id = int(message.channel.topic.split(': ')[1])
@@ -407,10 +409,10 @@ class Modmail(commands.Bot):
         except:
             pass
 
-        await asyncio.gather(
-            self.send_mail(message, message.channel, from_mod=True),
-            self.send_mail(message, user, from_mod=True)
-        )
+        await self.send_mail(message, message.channel, from_mod=True)
+        m = await self.send_mail(message, user, from_mod=True)
+
+        await self.db.execute(f"INSERT INTO modmail_links ({message.id}, {m.id}, TRUE)")
 
     def format_name(self, author, channels):
         name = author.name
