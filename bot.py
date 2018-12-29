@@ -137,6 +137,15 @@ class Modmail(commands.Bot):
                 
         await self.process_commands(message)
 
+    @staticmethod
+    async def find_user_id_from_channel(channel):
+        async for message in channel.history():
+            if message.embeds:
+                em = message.embeds[0]
+                matches = re.findall(r'<@(\d+)>', str(em.description))
+                if matches:
+                    return int(matches[0])
+
     async def on_message_delete(self, message):
         """Support for deleting linked messages"""
         if message.embeds and not isinstance(message.channel, discord.DMChannel):
