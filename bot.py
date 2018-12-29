@@ -157,7 +157,7 @@ class Modmail(commands.Bot):
         if not message.guild_id:  # Checks if this was a mod or not
             return
 
-        data = await self.db.fetch_row(f"SELECT * FROM modmail_links WHERE sent = {message.message_id}")
+        data = await self.db.fetchrow(f"SELECT * FROM modmail_links WHERE sent = {message.message_id}")
         print(data)
 
         if not data:
