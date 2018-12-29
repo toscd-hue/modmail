@@ -148,13 +148,17 @@ class Modmail(commands.Bot):
 
     async def on_raw_message_delete(self, message: discord.RawMessageDeleteEvent):
         channel = discord.utils.get(self.get_all_channels(), id=message.channel_id)
+        print(channel)
+        print(channel.category.name)
         if not channel.category.name.lower() == 'mod mail':
             return
 
+        print(message.guild_id)
         if not message.guild_id:  # Checks if this was a mod or not
             return
 
         data = await self.db.fetch_row(f"SELECT * FROM modmail_links WHERE sent = {message.message_id}")
+        print(data)
 
         if not data:
             return
