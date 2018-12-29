@@ -137,6 +137,25 @@ class Modmail(commands.Bot):
                 
         await self.process_commands(message)
 
+    async def on_message_delete(self, message):
+        """Support for deleting linked messages"""
+        if message.embeds and not isinstance(message.channel, discord.DMChannel):
+            matches = re.findall(r'Moderator - (\d+)', str(message.embeds[0].footer.text))
+            if matches:
+                user_id = None
+                if not message.channel.topic:
+                    user_id = await self.find_user_id_from_channel(message.channel)
+                user_id = user_id or int(message.channel.topic.split(': ')[1])
+
+                user = self.get_user(user_id)
+                channel = user.dm_channel
+                message_id = matches[0]
+
+                async for msg in channel.history():
+                    if msg.embeds and f'Moderator - {message_id}' in msg.embeds[0].footer.text:
+                        await msg.delete()
+                        break
+
     def overwrites(self, ctx, modrole=None):
         """Permision overwrites for the guild."""
         overwrites = {
@@ -378,7 +397,7 @@ class Modmail(commands.Bot):
             await self.db.execute(f"INSERT INTO modmail_log VALUES ({user_id}, '{db_log}')")
         except:
             pass
-        
+
         await asyncio.gather(
             self.send_mail(message, message.channel, from_mod=True),
             self.send_mail(message, user, from_mod=True)
@@ -482,7 +501,7 @@ class Modmail(commands.Bot):
         topic = str(top_chan.topic)
         topic += '\n' + id
 
-        if id not in top_chan.topic:  
+        if id not in top_chan.topic:
             await top_chan.edit(topic=topic)
             await ctx.send('User successfully blocked!')
         else:
