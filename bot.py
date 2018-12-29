@@ -157,7 +157,7 @@ class Modmail(commands.Bot):
         if not message.guild_id:  # Checks if this was a mod or not
             return
 
-        data = await self.db.fetchrow(f"SELECT * FROM modmail_links WHERE sent = {message.message_id}")
+        data = await self.db.fetchrow(f"SELECT * FROM modmail_links WHERE original = {message.message_id}")
         print(data)
 
         if not data:
@@ -166,7 +166,7 @@ class Modmail(commands.Bot):
         user_id = int(channel.topic.split(': ')[1])
         user = channel.guild.get_member(user_id)
 
-        message = await user.get_message(int(data['sent']))
+        message = await user.get_message(int(data['embedded']))
         await message.delete()
 
     def overwrites(self, ctx, modrole=None):
