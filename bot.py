@@ -373,7 +373,7 @@ class Modmail(commands.Bot):
         user_id = int(message.channel.topic.split(': ')[1])
         user = self.get_user(user_id)
 
-        db_log = f'{message.author.name} (Admin) {message.created_at.strftime("%Y-%b-%d %H:%M:%S")}|| {message.content}'
+        db_log = f'{message.author.name} (Admin) {message.created_at.strftime("%Y-%b-%d %H:%M:%S")} || {message.content}'
         try:
             await self.db.execute(f"INSERT INTO modmail_log VALUES ({message.author.id}, '{db_log}')")
         except:
@@ -428,7 +428,7 @@ class Modmail(commands.Bot):
         em.color = discord.Color.green()
         mention = self.config.get('MENTION') or '@here'
 
-        db_log = f'{message.author.name} (User) {message.created_at.strftime("%Y-%b-%d %H:%M:%S")}|| {message.content}'
+        db_log = f'{message.author.name} (User) {message.created_at.strftime("%Y-%b-%d %H:%M:%S")} || {message.content}'
         try:
             await self.db.execute(f"INSERT INTO modmail_log VALUES ({author.id}, '{db_log}')")
         except:
