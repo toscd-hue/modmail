@@ -408,15 +408,14 @@ class Modmail(commands.Bot):
         user = self.get_user(user_id)
 
         db_log = f'{message.author.name} (Admin) {message.created_at.strftime("%Y-%b-%d %H:%M:%S")} || {message.content}'
-        try:
-            await self.db.execute(f"INSERT INTO modmail_log VALUES ({user_id}, '{db_log}')")
-        except:
-            pass
+        async with self.db.aquire() as con:
+            await con.execute(f"INSERT INTO modmail_log VALUES ({user_id}, '{db_log}')")
 
         o = await self.send_mail(message, message.channel, from_mod=True)
         m = await self.send_mail(message, user, from_mod=True)
 
-        await self.db.execute(f"INSERT INTO modmail_links VALUES ({o.id}, {m.id}, TRUE)")
+        async with self.db.aquire() as con:
+            await con.execute(f"INSERT INTO modmail_links VALUES ({o.id}, {m.id}, TRUE)")
 
     def format_name(self, author, channels):
         name = author.name
@@ -463,10 +462,8 @@ class Modmail(commands.Bot):
         mention = self.config.get('MENTION') or '@here'
 
         db_log = f'{message.author.name} (User) {message.created_at.strftime("%Y-%b-%d %H:%M:%S")} || {message.content}'
-        try:
-            await self.db.execute(f"INSERT INTO modmail_log VALUES ({author.id}, '{db_log}')")
-        except:
-            pass
+        async with self.db.aquire() as con:
+            await con.execute(f"INSERT INTO modmail_log VALUES ({author.id}, '{db_log}')")
 
         if channel:
             if channel.category == archives:
