@@ -408,13 +408,13 @@ class Modmail(commands.Bot):
         user = self.get_user(user_id)
 
         db_log = f'{message.author.name} (Admin) {message.created_at.strftime("%Y-%b-%d %H:%M:%S")} || {message.content}'
-        async with self.db.aquire() as con:
+        async with self.db.acquire() as con:
             await con.execute(f"INSERT INTO modmail_log VALUES ({user_id}, '{db_log}')")
 
         o = await self.send_mail(message, message.channel, from_mod=True)
         m = await self.send_mail(message, user, from_mod=True)
 
-        async with self.db.aquire() as con:
+        async with self.db.acquire() as con:
             await con.execute(f"INSERT INTO modmail_links VALUES ({o.id}, {m.id}, TRUE)")
 
     def format_name(self, author, channels):
@@ -462,7 +462,7 @@ class Modmail(commands.Bot):
         mention = self.config.get('MENTION') or '@here'
 
         db_log = f'{message.author.name} (User) {message.created_at.strftime("%Y-%b-%d %H:%M:%S")} || {message.content}'
-        async with self.db.aquire() as con:
+        async with self.db.acquire() as con:
             await con.execute(f"INSERT INTO modmail_log VALUES ({author.id}, '{db_log}')")
 
         if channel:
