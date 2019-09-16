@@ -489,6 +489,14 @@ class Modmail(commands.Bot):
                 ctx.message.content = msg
                 await self.process_reply(ctx.message)
 
+    @commands.command(name="createthread", aliases=["ct"])
+    async def createthread(ctx, name: discord.Member)
+        """Make a thread"""
+        categ = discord.utils.get(ctx.guild.categories, id=ctx.channel.category_id)
+        if categ is not None and categ.name == 'Mod Mail':
+            await ctx.guild.create_text_channel(str(name), category=categ)
+            await ctx.send("done, ok bye.")        
+
     @commands.command(name="customstatus", aliases=['status', 'presence'])
     @commands.has_permissions(administrator=True)
     async def _status(self, ctx, *, message):
