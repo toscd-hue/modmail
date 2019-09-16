@@ -494,7 +494,8 @@ class Modmail(commands.Bot):
         """Make a thread"""
         categ = discord.utils.get(ctx.guild.categories, id=ctx.channel.category_id)
         if categ is not None and categ.name == 'Mod Mail':
-            await ctx.guild.create_text_channel(str(name), category=categ)
+            nch = await ctx.guild.create_text_channel(str(name), category=categ)
+            await nch.edit(topic="User ID: " + str(name.id))
             await ctx.send("done, ok bye.")        
 
     @commands.command(name="customstatus", aliases=['status', 'presence'])
