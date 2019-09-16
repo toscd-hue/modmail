@@ -490,7 +490,7 @@ class Modmail(commands.Bot):
                 await self.process_reply(ctx.message)
 
     @commands.command(name="createthread", aliases=["ct"])
-    async def createthread(ctx, name: discord.Member)
+    async def createthread(ctx, name: discord.Member):
         """Make a thread"""
         categ = discord.utils.get(ctx.guild.categories, id=ctx.channel.category_id)
         if categ is not None and categ.name == 'Mod Mail':
