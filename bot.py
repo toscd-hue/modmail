@@ -157,17 +157,16 @@ class Modmail(commands.Bot):
         if not message.guild_id:  # Checks if this was a mod or not
             return
 
-        data = await self.db.fetchrow(f"SELECT * FROM modmail_links WHERE original = {message.message_id}")
-        print(data)
-
-        if not data:
-            return
-
         user_id = int(channel.topic.split(': ')[1])
         user = channel.guild.get_member(user_id)
 
         message = await user.get_message(int(data['embedded']))
         await message.delete()
+        
+        data = await self.db.fetchrow(f"SELECT * FROM modmail_links WHERE original = {message.message_id}")
+
+        if not data:
+            return
 
     def overwrites(self, ctx, modrole=None):
         """Permision overwrites for the guild."""
@@ -407,13 +406,13 @@ class Modmail(commands.Bot):
         user_id = int(message.channel.topic.split(': ')[1])
         user = self.get_user(user_id)
 
-        db_log = f'{message.author.name} (Admin) {message.created_at.strftime("%Y-%b-%d %H:%M:%S")} || {message.content}'
-        async with self.db.acquire() as con:
-            await con.execute(f"INSERT INTO modmail_log VALUES ($1, $2)", user_id, db_log)
-
         o = await self.send_mail(message, message.channel, from_mod=True)
         m = await self.send_mail(message, user, from_mod=True)
 
+        db_log = f'{message.author.name} (Admin) {message.created_at.strftime("%Y-%b-%d %H:%M:%S")} || {message.content}'
+        async with self.db.acquire() as con:
+            await con.execute(f"INSERT INTO modmail_log VALUES ($1, $2)", user_id, db_log)
+            
         async with self.db.acquire() as con:
             await con.execute(f"INSERT INTO modmail_links VALUES ($1, $2, TRUE)", o.id, m.id)
 
@@ -461,10 +460,6 @@ class Modmail(commands.Bot):
         em.color = discord.Color.green()
         mention = self.config.get('MENTION') or '@here'
 
-        db_log = f'{message.author.name} (User) {message.created_at.strftime("%Y-%b-%d %H:%M:%S")} || {message.content}'
-        async with self.db.acquire() as con:
-            await con.execute(f"INSERT INTO modmail_log VALUES ($1, $2)", author.id, db_log)
-
         if channel:
             if channel.category == archives:
                 await channel.edit(category=categ)
@@ -479,6 +474,10 @@ class Modmail(commands.Bot):
             await channel.edit(topic=topic)
             await channel.send(mention, embed=self.format_info(message))
             await self.send_mail(message, channel, from_mod=False)
+         
+        db_log = f'{message.author.name} (User) {message.created_at.strftime("%Y-%b-%d %H:%M:%S")} || {message.content}'
+        async with self.db.acquire() as con:
+            await con.execute(f"INSERT INTO modmail_log VALUES ($1, $2)", author.id, db_log)
 
     @commands.command()
     async def reply(self, ctx, *, msg=''):
