@@ -478,6 +478,7 @@ class Modmail(commands.Bot):
         db_log = f'{message.author.name} (User) {message.created_at.strftime("%Y-%b-%d %H:%M:%S")} || {message.content}'
         async with self.db.acquire() as con:
             await con.execute(f"INSERT INTO modmail_log VALUES ($1, $2)", author.id, db_log)
+        print("Log success")
 
     @commands.command()
     async def reply(self, ctx, *, msg=''):
